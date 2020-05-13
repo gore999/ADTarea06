@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,11 +106,21 @@ public class Repositorio {
 
     //MENSAJES
     public void insertarMensaje(Mensaje msg) {
-        String mensajeJSON = g.toJson(msg);
-        System.out.println(mensajeColeccion);
+        
+        //String mensajeJSON = g.toJson(msg);
+        
+        
+        DBObject msgInsert = new BasicDBObject()
+        .append("text", msg.getText())
+        .append("user", new BasicDBObject()
+                .append("nome", msg.getUser().getNombre())
+                .append("username", msg.getUser().getUsername()))
+        .append("date", new Date())
+        .append("hashtags", Arrays.asList(msg.getHashtags()));
+        System.out.println(msgInsert);
         // DBBasicObjec
-        DBObject mensajeMongo = (DBObject) JSON.parse(mensajeJSON);
-        mensajeColeccion.insert(mensajeMongo);
+        //DBObject mensajeMongo = (DBObject) JSON.parse(mensajeJSON);
+        mensajeColeccion.insert(msgInsert);
     }
 
     ArrayList<Usuario> getSeguidos(Usuario user) {
@@ -161,10 +172,9 @@ public class Repositorio {
         Mensaje msgAux = null;
         DBObject query = null;
         Bson filter;
-        //Filtrado
+        //Filtrado, segun lo que estemos mostrando en la tabla, se establece un filtro.
         switch (mt.estadoPanelMensajes) {
             case 0: // Todos los mensajes.
-             
                 query = new BasicDBObject();
                 break;
             case 1:// Mensajes por usuario
@@ -186,41 +196,31 @@ public class Repositorio {
         //Crear sort para ordenado.
         Bson ordenar = Sorts.descending("date");
         DBObject sort = new BasicDBObject(ordenar.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
+        
         //Añadir restricciones
         options.sort(sort);
         options.limit(MiniTwitter.tamanoPagina);//Como maximo, el numero de resultados que marca la pagina.
         options.skip(mt.numeroPagina * MiniTwitter.tamanoPagina); //Se salta los resultados de las paginas anteriores.
         // Iterar
+        System.out.println("Options"+options.toString());
         DBCursor cursor = this.mensajeColeccion.find(query, options);
         while (cursor.hasNext()) {
             DBObject documento = cursor.next();
-            msgAux = g.fromJson(documento.toString(), Mensaje.class);
-            salida.add(msgAux);
+            Mensaje m=new Mensaje();
+            m.setText((String) documento.get("text"));
+            m.setDate((Date)documento.get("date"));
+            m.setHashtags((ArrayList<String>)documento.get("hashtags"));
+            User u=new User();
+            u.setNombre((String)documento.get("nome"));
+            u.setUsername((String)documento.get("username"));
+            m.setUser(u);
+            //msgAux = g.fromJson(documento.toString(), Mensaje.class);
+            salida.add(m);
         }
         return salida;
     }
 
-//    ArrayList<Mensaje> getMensajes() {
-//        ArrayList<Mensaje> salida = new ArrayList();
-//        Mensaje msgAux = null;
-//  
-//        DBCollectionFindOptions options = new DBCollectionFindOptions();
-//        //Crear sort
-//        Bson ordenar = Sorts.descending("text");
-//        DBObject sort = new BasicDBObject(ordenar.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
-//        //Añadir restricciones
-//        options.sort(sort);       
-//        options.limit(MiniTwitter.tamanoPagina);
-//        options.skip(MiniTwitter.numeroPagina * MiniTwitter.tamanoPagina);
-//        // Iterar
-//        DBCursor cursor = this.mensajeColeccion.find(new BasicDBObject(), options);
-//        while (cursor.hasNext()) {
-//            DBObject documento = cursor.next();
-//            msgAux = g.fromJson(documento.toString(), Mensaje.class);
-//            salida.add(msgAux);
-//        }
-//        return salida;
-//    }
+
     void updateUser(Usuario user) {
         System.out.println(user.toString());
     }
