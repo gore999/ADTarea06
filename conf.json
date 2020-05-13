@@ -1,0 +1,7 @@
+{
+    "address":"192.168.56.102",
+    "port":"27017",
+    "dbname":"minitwitter",
+    "username":"root",
+    "password":"abc123."
+}
