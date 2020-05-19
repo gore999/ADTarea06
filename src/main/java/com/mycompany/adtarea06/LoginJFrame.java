@@ -17,6 +17,7 @@ public class LoginJFrame extends javax.swing.JFrame {
      * Creates new form LoginJFrame
      */
     public LoginJFrame() {
+        Repositorio Rep=Repositorio.getInstance();
         initComponents();
     }
 
@@ -195,6 +196,12 @@ public class LoginJFrame extends javax.swing.JFrame {
                 }else{
                     rep.insertarUsuario(usuario);
                 }
+             this.usuarioText.setText("");
+             this.nombreCompletoText.setText("");
+             this.passwordText.setText("");
+             this.repitePasswordText.setText("");
+             JOptionPane.showConfirmDialog(this, "Usuario registrado con exito","Felicidades", JOptionPane.DEFAULT_OPTION);
+
             }else{
                 JOptionPane.showConfirmDialog(this, "Las contraseñas no coinciden","Error", JOptionPane.DEFAULT_OPTION);
                 this.passwordText.setText("");

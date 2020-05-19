@@ -1,7 +1,7 @@
 {
-    "address":"192.168.56.102",
-    "port":"27017",
-    "dbname":"minitwitter",
-    "username":"root",
-    "password":"abc123."
+"address":"ds259348.mlab.com",
+"port":"59348",
+"dbname":"minichios",
+"username":"admin",
+"password":"accesoadatos6"
 }

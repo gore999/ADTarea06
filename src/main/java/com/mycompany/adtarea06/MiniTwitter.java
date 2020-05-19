@@ -5,6 +5,7 @@
  */
 package com.mycompany.adtarea06;
 
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -25,6 +26,8 @@ public class MiniTwitter extends javax.swing.JFrame {
     static final int tamanoPagina = 5;//Constante para el tamaño de la pagina, comun a todas las instancias de MiniTwitter
     int numeroPagina = 0;// Pagina en la que se encuentra
     int estadoPanelMensajes = 0;// Que mensajes se están viendo //0 es todos//1 de usuario//
+    int numeroPaginaBuscados = 0;// Pagina en la que se encuentra
+    int numeroPaginaSeguidos = 0;// Pagina en la que se encuentra
     ModeloTablaSeguidos modeloTablaSeguidos;
     ModeloTablaBuscados modeloTablaBuscados;
     ModeloTablaMensajes modeloTablaMensajes;
@@ -35,6 +38,7 @@ public class MiniTwitter extends javax.swing.JFrame {
     Usuario uAux;// Usuario seleccionado para seguir.
     Repositorio rep;
     String cadenaAux;//Para pasar mensajes al repositorio.
+    String criterioBuscados = "";
 
     public MiniTwitter() {
         initComponents();
@@ -43,6 +47,7 @@ public class MiniTwitter extends javax.swing.JFrame {
     public MiniTwitter(Usuario user, Repositorio rep) {
         this();
         this.user = user;
+        this.sesionLabel.setText("Sesion de: " + user.getUsername() + "(" + user.getNome() + ")");
         this.rep = rep;
         uAux = null;
         seguidos = rep.getSeguidos(user);
@@ -59,7 +64,8 @@ public class MiniTwitter extends javax.swing.JFrame {
         this.tablaUsuariosSeguidos.setModel(modeloTablaSeguidos);
         this.tablaUsuariosBuscados.setModel(modeloTablaBuscados);
         this.tablaMensajes.setModel(modeloTablaMensajes);
-        this.setWithColumns(tablaMensajes, new int[]{100, 100, 100, 200});
+        this.setWithColumns(tablaMensajes, new int[]{10, 20, 10, 60});
+        tablaMensajes.setRowHeight(25);
 
     }
 
@@ -79,14 +85,20 @@ public class MiniTwitter extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         botonSeguirUsuario = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
-        jScrollPane5 = new javax.swing.JScrollPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tablaUsuariosSeguidos = new javax.swing.JTable();
-        jScrollPane6 = new javax.swing.JScrollPane();
         jScrollPane3 = new javax.swing.JScrollPane();
         tablaUsuariosBuscados = new javax.swing.JTable();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tablaUsuariosSeguidos = new javax.swing.JTable();
+        botonRegPagSiguiendo = new javax.swing.JButton();
+        botonAvPagSiguiendo = new javax.swing.JButton();
+        paginaSeguidosLabel = new javax.swing.JLabel();
+        botonRegPagBuscados = new javax.swing.JButton();
+        botonAvPagBuscados = new javax.swing.JButton();
+        labelNumeroPaginaBuscados = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         label1 = new java.awt.Label();
+        jPanel7 = new javax.swing.JPanel();
+        sesionLabel = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         botonVerAllMensajes = new javax.swing.JButton();
@@ -94,12 +106,13 @@ public class MiniTwitter extends javax.swing.JFrame {
         botonMensajesPorHashTag = new javax.swing.JButton();
         hashtagtext = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        jPanel8 = new javax.swing.JPanel();
         botonRetrocederPagina = new javax.swing.JButton();
-        BotonAvanzarMensajes = new javax.swing.JButton();
         paginaLabel = new javax.swing.JLabel();
-        jScrollPane7 = new javax.swing.JScrollPane();
+        BotonAvanzarMensajes = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         tablaMensajes = new javax.swing.JTable();
+        labelMensajesMostrados = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
         botonEnviarMensaje = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -127,7 +140,28 @@ public class MiniTwitter extends javax.swing.JFrame {
             }
         });
 
-        jScrollPane5.setHorizontalScrollBar(null);
+        tablaUsuariosBuscados.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        tablaUsuariosBuscados.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                tablaUsuariosBuscadosFocusGained(evt);
+            }
+        });
+        tablaUsuariosBuscados.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaUsuariosBuscadosMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(tablaUsuariosBuscados);
 
         tablaUsuariosSeguidos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -143,27 +177,45 @@ public class MiniTwitter extends javax.swing.JFrame {
         tablaUsuariosSeguidos.setMaximumSize(new java.awt.Dimension(64, 64));
         jScrollPane1.setViewportView(tablaUsuariosSeguidos);
 
-        jScrollPane5.setViewportView(jScrollPane1);
-
-        tablaUsuariosBuscados.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        tablaUsuariosBuscados.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tablaUsuariosBuscadosMouseClicked(evt);
+        botonRegPagSiguiendo.setText("<<");
+        botonRegPagSiguiendo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonRegPagSiguiendoActionPerformed(evt);
             }
         });
-        jScrollPane3.setViewportView(tablaUsuariosBuscados);
 
-        jScrollPane6.setViewportView(jScrollPane3);
+        botonAvPagSiguiendo.setText(">>");
+        botonAvPagSiguiendo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonAvPagSiguiendoActionPerformed(evt);
+            }
+        });
+
+        paginaSeguidosLabel.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        paginaSeguidosLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        paginaSeguidosLabel.setText("0");
+        paginaSeguidosLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        botonRegPagBuscados.setText("<<");
+        botonRegPagBuscados.setEnabled(false);
+        botonRegPagBuscados.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonRegPagBuscadosActionPerformed(evt);
+            }
+        });
+
+        botonAvPagBuscados.setText(">>");
+        botonAvPagBuscados.setEnabled(false);
+        botonAvPagBuscados.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonAvPagBuscadosActionPerformed(evt);
+            }
+        });
+
+        labelNumeroPaginaBuscados.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        labelNumeroPaginaBuscados.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelNumeroPaginaBuscados.setText("0");
+        labelNumeroPaginaBuscados.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -174,15 +226,26 @@ public class MiniTwitter extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(botonBuscarUsuarios, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
-                                .addComponent(jScrollPane6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                            .addComponent(botonSeguirUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jTextField1)
+                            .addComponent(botonBuscarUsuarios, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                .addComponent(botonRegPagSiguiendo, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(paginaSeguidosLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(botonAvPagSiguiendo))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(botonRegPagBuscados, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(labelNumeroPaginaBuscados, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(botonAvPagBuscados))
+                            .addComponent(botonSeguirUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 7, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -190,8 +253,14 @@ public class MiniTwitter extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(botonRegPagSiguiendo)
+                        .addComponent(botonAvPagSiguiendo))
+                    .addComponent(paginaSeguidosLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -199,29 +268,58 @@ public class MiniTwitter extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(botonBuscarUsuarios)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(botonRegPagBuscados)
+                        .addComponent(botonAvPagBuscados))
+                    .addComponent(labelNumeroPaginaBuscados))
+                .addGap(18, 18, 18)
                 .addComponent(botonSeguirUsuario)
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
 
         label1.setFont(new java.awt.Font("Comic Sans MS", 3, 48)); // NOI18N
         label1.setText("MINITWITTER");
+
+        sesionLabel.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(sesionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 633, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(65, Short.MAX_VALUE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addComponent(sesionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(31, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(338, 338, 338)
-                .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, 410, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(76, 76, 76)
+                .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, 382, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -259,6 +357,11 @@ public class MiniTwitter extends javax.swing.JFrame {
             }
         });
 
+        paginaLabel.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        paginaLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        paginaLabel.setText("0");
+        paginaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
         BotonAvanzarMensajes.setText("Avanzar página>>");
         BotonAvanzarMensajes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -266,11 +369,30 @@ public class MiniTwitter extends javax.swing.JFrame {
             }
         });
 
-        paginaLabel.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
-        paginaLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        paginaLabel.setText("0");
-        paginaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(botonRetrocederPagina)
+                .addGap(13, 13, 13)
+                .addComponent(paginaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(BotonAvanzarMensajes, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(botonRetrocederPagina)
+                    .addComponent(BotonAvanzarMensajes)
+                    .addComponent(paginaLabel))
+                .addGap(0, 12, Short.MAX_VALUE))
+        );
 
+        tablaMensajes.setFont(new java.awt.Font("Verdana", 0, 11)); // NOI18N
         tablaMensajes.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -284,7 +406,8 @@ public class MiniTwitter extends javax.swing.JFrame {
         ));
         jScrollPane4.setViewportView(tablaMensajes);
 
-        jScrollPane7.setViewportView(jScrollPane4);
+        labelMensajesMostrados.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        labelMensajesMostrados.setText("TODOS");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -293,48 +416,46 @@ public class MiniTwitter extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGap(189, 189, 189)
-                        .addComponent(jLabel2))
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGap(263, 263, 263)
-                        .addComponent(botonRetrocederPagina)
-                        .addGap(13, 13, 13)
-                        .addComponent(paginaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(BotonAvanzarMensajes, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel5Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 926, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addComponent(botonVerAllMensajes)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(botonMensajesSeguidos, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(95, 95, 95)
-                                .addComponent(botonMensajesPorHashTag)
-                                .addGap(18, 18, 18)
-                                .addComponent(hashtagtext, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(365, Short.MAX_VALUE))
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 959, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGap(265, 265, 265)
+                        .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(jPanel5Layout.createSequentialGroup()
+                            .addGap(189, 189, 189)
+                            .addComponent(jLabel2)
+                            .addGap(18, 18, 18)
+                            .addComponent(labelMensajesMostrados, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel5Layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(botonVerAllMensajes)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(botonMensajesSeguidos, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(95, 95, 95)
+                            .addComponent(botonMensajesPorHashTag)
+                            .addGap(18, 18, 18)
+                            .addComponent(hashtagtext, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labelMensajesMostrados, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(botonVerAllMensajes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(botonMensajesSeguidos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(botonMensajesPorHashTag, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(hashtagtext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(botonRetrocederPagina)
-                    .addComponent(BotonAvanzarMensajes)
-                    .addComponent(paginaLabel))
-                .addGap(481, 481, 481))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         botonEnviarMensaje.setFont(new java.awt.Font("Verdana", 1, 12)); // NOI18N
@@ -359,8 +480,7 @@ public class MiniTwitter extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(botonEnviarMensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 746, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 756, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -377,13 +497,14 @@ public class MiniTwitter extends javax.swing.JFrame {
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(375, Short.MAX_VALUE))
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -391,7 +512,7 @@ public class MiniTwitter extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -406,7 +527,8 @@ public class MiniTwitter extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -418,7 +540,7 @@ public class MiniTwitter extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 12, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -432,8 +554,8 @@ public class MiniTwitter extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 605, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 25, Short.MAX_VALUE))
         );
 
         pack();
@@ -447,8 +569,9 @@ public class MiniTwitter extends javax.swing.JFrame {
         User msgUser = new User(this.user.getNome(), this.user.getUsername());//Añadimos el User
         msg.setUser(msgUser);
         //Obtener los Hashtags:
-        System.out.println("Matcheando...");
-        Pattern patron = Pattern.compile("#\\S+\\s");
+
+        //Pattern patron = Pattern.compile("#\\S+\\s");
+        Pattern patron = Pattern.compile("#[a-zA-Z0-9_-]+");
         Matcher matcher = patron.matcher(this.textoMensajeAEnviar.getText());
         //Añadir los hashtags al mensaje
         while (matcher.find()) {
@@ -463,23 +586,31 @@ public class MiniTwitter extends javax.swing.JFrame {
         //Insertar el mensaje.
         this.textoMensajeAEnviar.setText("");
         rep.insertarMensaje(msg);
+        this.flushTablaMensajes();
 
     }//GEN-LAST:event_botonEnviarMensajeActionPerformed
 
     private void botonBuscarUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonBuscarUsuariosActionPerformed
         // TODO add your handling code here:
-        ArrayList<Usuario> busqueda;
-        String criterio = this.jTextField1.getText();
-        this.buscados.clear();
-        buscados.addAll(rep.getUsuariosBuscadosPorUsername(criterio));
-        this.tablaUsuariosBuscados.revalidate();
 
-        this.tablaUsuariosBuscados.repaint();
+        this.numeroPaginaBuscados = 0;//Ponemos a 0 la pagina.
+        criterioBuscados = this.jTextField1.getText();
+        ArrayList<Usuario> auxlista = rep.getUsuariosBuscadosPorUsername(criterioBuscados, this);// Recuperamos los usuarios.
+        if (auxlista.size() > 0) {
+            this.buscados.clear();
+            buscados.addAll(auxlista);
+            this.tablaUsuariosBuscados.revalidate();
+            this.tablaUsuariosBuscados.repaint();
+            this.botonAvPagBuscados.setEnabled(true);
+            this.botonRegPagBuscados.setEnabled(true);
+        }
+        this.labelNumeroPaginaBuscados.setText("" + numeroPaginaBuscados);
     }//GEN-LAST:event_botonBuscarUsuariosActionPerformed
 
     private void botonMensajesSeguidosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonMensajesSeguidosActionPerformed
         // TODO add your handling code here:
         this.estadoPanelMensajes = 1;
+        this.labelMensajesMostrados.setText("SEGUIDOS");
         flushTablaMensajes();
     }//GEN-LAST:event_botonMensajesSeguidosActionPerformed
 
@@ -491,9 +622,10 @@ public class MiniTwitter extends javax.swing.JFrame {
         if (maux.size() == 0) {// Si no hay resultados avanzando pagina, es que nos hemos pasado (no hay mas resultados)
             numeroPagina--;//retrocedemos a la pagina anterior.
             maux = rep.getMensajes(this);//reestablecemos los resultados de la pagina anterior, que era la ultima.
+            Toolkit.getDefaultToolkit().beep();
         }
         //Refrescar tabla mensajes.
-        this.modeloTablaMensajes.mensajes = maux; 
+        this.modeloTablaMensajes.mensajes = maux;
         this.paginaLabel.setText(numeroPagina + "");
         this.tablaMensajes.repaint();
 
@@ -507,20 +639,31 @@ public class MiniTwitter extends javax.swing.JFrame {
     }//GEN-LAST:event_tablaUsuariosBuscadosMouseClicked
 
     private void botonSeguirUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonSeguirUsuarioActionPerformed
-        // TODO add your handling code here:
-        if (user.getFollows().contains(uAux.getUsername())) {
-            JOptionPane.showConfirmDialog(this, "Ya sigue al usuario indicado", "Alerta!", JOptionPane.DEFAULT_OPTION);
-        } else {
-            user.getFollows().add(uAux.getUsername());
-            rep.updateUser(user);
-            this.seguidos.add(uAux);
-            this.buscados.remove(uAux);
-            this.tablaUsuariosSeguidos.revalidate();
-            this.tablaUsuariosBuscados.revalidate();
-            this.tablaUsuariosSeguidos.repaint();
-            this.tablaUsuariosBuscados.repaint();
-        }
+        // Añadir al usuario activo el nuevo usuario seguido
+        //En ejecucion
+        uAux = this.modeloTablaBuscados.buscados.get(this.tablaUsuariosBuscados.getSelectedRow());
+        System.out.print("aux----->>>>>");
+        System.out.println(modeloTablaBuscados.buscados.get(this.tablaUsuariosBuscados.getSelectedRow()));
+        user.getFollows().add(uAux.getUsername());
+        this.seguidos.add(uAux);
+        this.buscados.remove(uAux);
+        //En base de datos
+        rep.updateUser(user, uAux);
+        // Actualizar tabla buscados.
 
+        //this.numeroPaginaBuscados--;// añadimos 1 al contador.
+        ArrayList<Usuario> buscadosAux = rep.getUsuariosBuscadosPorUsername(criterioBuscados, this); // Obtenemos el nuevo listado, puede ser vacio. 
+        if (buscadosAux.size() == 0) {//Caso de estar en la ultima pagina y añadimos el ultimo.
+            if (this.numeroPaginaBuscados > 0) {
+                this.numeroPaginaBuscados--;//reducimos una pagina
+                buscadosAux = rep.getUsuariosBuscadosPorUsername(criterioBuscados, this);//Realizamos una nueva busqueda
+
+            }
+        }
+        this.modeloTablaBuscados.buscados.clear();
+        this.modeloTablaBuscados.buscados.addAll(buscadosAux);
+        this.flushTablaBuscados(buscadosAux); // La tabla se actualiza con los valores recuperados.
+        flushTablaSeguidos();
     }//GEN-LAST:event_botonSeguirUsuarioActionPerformed
 
     private void botonRetrocederPaginaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonRetrocederPaginaActionPerformed
@@ -543,6 +686,7 @@ public class MiniTwitter extends javax.swing.JFrame {
 
     private void botonVerAllMensajesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonVerAllMensajesActionPerformed
         this.estadoPanelMensajes = 0;// Vamos a ver todos.
+        this.labelMensajesMostrados.setText("TODOS");
         flushTablaMensajes();
     }//GEN-LAST:event_botonVerAllMensajesActionPerformed
 
@@ -551,14 +695,88 @@ public class MiniTwitter extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.estadoPanelMensajes = 2;
         cadenaAux = this.hashtagtext.getText();
+        this.labelMensajesMostrados.setText("Hashtag #" + cadenaAux);
         flushTablaMensajes();
 
     }//GEN-LAST:event_botonMensajesPorHashTagActionPerformed
+
+    private void botonRegPagBuscadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonRegPagBuscadosActionPerformed
+        // TODO add your handling code here:
+        if (numeroPaginaBuscados > 0) {
+            this.numeroPaginaBuscados--;// añadimos 1 al contador.
+            ArrayList<Usuario> buscadosAux = rep.getUsuariosBuscadosPorUsername(criterioBuscados, this); // buscamos usuarios que coincidan con el criterio de busqueda. 
+            this.modeloTablaBuscados.buscados.clear();
+            this.modeloTablaBuscados.buscados.addAll(buscadosAux);
+            this.flushTablaBuscados(buscadosAux); // La tabla se actualiza con los valores recuperados.
+        }
+    }//GEN-LAST:event_botonRegPagBuscadosActionPerformed
+
+    private void botonAvPagBuscadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonAvPagBuscadosActionPerformed
+        // TODO add your handling code here:
+
+        this.numeroPaginaBuscados++;// añadimos 1 al contador.
+        ArrayList<Usuario> buscadosAux = rep.getUsuariosBuscadosPorUsername(criterioBuscados, this); // buscamos usuarios que coincidan con el criterio de busqueda. 
+        if (buscadosAux.size() > 0) {//Si obtenemos resultados para la pagina actual...
+            this.modeloTablaBuscados.buscados.clear();
+            this.modeloTablaBuscados.buscados.addAll(buscadosAux);
+            this.flushTablaBuscados(buscadosAux); // La tabla se actualiza con los valores recuperados.
+        } else {// si la busqueda no da resultados, decrecemos el numero de pagina de nuevo.
+            this.numeroPaginaBuscados--;//Si no hay resultados, volvemos la pagina atras
+            Toolkit.getDefaultToolkit().beep();
+        }
+    }//GEN-LAST:event_botonAvPagBuscadosActionPerformed
+
+    private void botonAvPagSiguiendoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonAvPagSiguiendoActionPerformed
+        // TODO add your handling code here:
+        this.numeroPaginaSeguidos++;
+        if (user.follows.size() < 5 * numeroPaginaSeguidos) {
+            this.numeroPaginaSeguidos--;
+            Toolkit.getDefaultToolkit().beep();
+        }
+        this.flushTablaSeguidos();
+    }//GEN-LAST:event_botonAvPagSiguiendoActionPerformed
+
+    private void botonRegPagSiguiendoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonRegPagSiguiendoActionPerformed
+        // TODO add your handling code here:
+        if (this.numeroPaginaSeguidos > 0) {
+            this.numeroPaginaSeguidos--;
+        }
+        this.flushTablaSeguidos();
+    }//GEN-LAST:event_botonRegPagSiguiendoActionPerformed
+
+    private void tablaUsuariosBuscadosFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tablaUsuariosBuscadosFocusGained
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_tablaUsuariosBuscadosFocusGained
     private void flushTablaMensajes() {
         this.numeroPagina = 0; //Pone la pagina en 
         this.modeloTablaMensajes.mensajes = rep.getMensajes(this);// Cambia los datos de la tabla
+        this.paginaLabel.setText(this.numeroPagina + "");
         this.tablaMensajes.repaint();//redibuja la tabla.
-        this.paginaLabel.setText(""+numeroPagina);
+    }
+
+    private void flushTablaBuscados(ArrayList<Usuario> us) {//Cambiar indicador, actualizar la tabla.
+
+        this.tablaUsuariosBuscados.repaint();//redibuja la tabla.
+        this.labelNumeroPaginaBuscados.setText("" + this.numeroPaginaBuscados);//Actualizar 
+    }
+
+    private void flushTablaSeguidos() {
+        int puntoInicial = MiniTwitter.tamanoPagina * this.numeroPaginaSeguidos;
+        int numSeguidos = user.follows.size();
+        int hasta = Math.min(numSeguidos - puntoInicial, 5); // El menor de los dos valores. del punto de inicio al final el arraylist, o 5 (maximo visible en tabla).
+        System.out.println("Punto inicial: " + puntoInicial + "   Seguidos: " + numSeguidos + "    hasta: " + hasta);
+        this.modeloTablaSeguidos.seguidos.clear();//vaciamos el arraylist
+        for (int i = puntoInicial; i < puntoInicial + hasta; i++) {
+            Usuario u = rep.getUsuarioByUserName(user.getFollows().get(i));
+            if (u != null) {
+                modeloTablaSeguidos.seguidos.add(u);
+            }
+            System.out.println("Siguiendo a " + u);
+        }
+        this.paginaSeguidosLabel.setText("" + numeroPaginaSeguidos);
+        this.tablaUsuariosSeguidos.repaint();
+        this.tablaUsuariosSeguidos.revalidate();
     }
 
     /**
@@ -598,10 +816,14 @@ public class MiniTwitter extends javax.swing.JFrame {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BotonAvanzarMensajes;
+    private javax.swing.JButton botonAvPagBuscados;
+    private javax.swing.JButton botonAvPagSiguiendo;
     private javax.swing.JButton botonBuscarUsuarios;
     private javax.swing.JButton botonEnviarMensaje;
     private javax.swing.JButton botonMensajesPorHashTag;
     private javax.swing.JButton botonMensajesSeguidos;
+    private javax.swing.JButton botonRegPagBuscados;
+    private javax.swing.JButton botonRegPagSiguiendo;
     private javax.swing.JButton botonRetrocederPagina;
     private javax.swing.JButton botonSeguirUsuario;
     private javax.swing.JButton botonVerAllMensajes;
@@ -614,17 +836,20 @@ public class MiniTwitter extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JScrollPane jScrollPane6;
-    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTextField jTextField1;
     private java.awt.Label label1;
+    private javax.swing.JLabel labelMensajesMostrados;
+    private javax.swing.JLabel labelNumeroPaginaBuscados;
     private javax.swing.JLabel paginaLabel;
+    private javax.swing.JLabel paginaSeguidosLabel;
+    private javax.swing.JLabel sesionLabel;
     private javax.swing.JTable tablaMensajes;
     private javax.swing.JTable tablaUsuariosBuscados;
     private javax.swing.JTable tablaUsuariosSeguidos;
@@ -634,9 +859,9 @@ public class MiniTwitter extends javax.swing.JFrame {
     private void setWithColumns(JTable tabla, int[] columnas) {
 
         for (int i = 0; i < columnas.length; i++) {
-            System.out.println(i + "----");
             TableColumn column = tabla.getColumnModel().getColumn(i); //cogemos la columna que corresponde al indice.
-            column.setPreferredWidth(columnas[i]); //aplicamos el valor que corresponde en el array
+            tabla.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            column.setPreferredWidth(tabla.getWidth() * columnas[i] / 100); //aplicamos el valor % que corresponde en el array
 
         }
     }
