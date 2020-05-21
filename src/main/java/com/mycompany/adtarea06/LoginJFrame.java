@@ -5,6 +5,8 @@
  */
 package com.mycompany.adtarea06;
 
+import java.awt.Image;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 /**
@@ -18,7 +20,10 @@ public class LoginJFrame extends javax.swing.JFrame {
      */
     public LoginJFrame() {
         Repositorio Rep=Repositorio.getInstance();
+        this.pack();
         initComponents();
+        setLocation((int) (ADTarea06.COORD_X-this.getSize().getWidth()/2), (int) (ADTarea06.COORD_Y-this.getSize().getHeight()/2));
+        System.out.println(ADTarea06.COORD_X+" -- "+this.getWidth());
     }
 
     /**
@@ -32,11 +37,11 @@ public class LoginJFrame extends javax.swing.JFrame {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
-        loginPasswText = new javax.swing.JTextField();
         loginUserText = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         ButtonLogin = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
+        jPasswordField1 = new javax.swing.JPasswordField();
         jPanel2 = new javax.swing.JPanel();
         usuarioText = new javax.swing.JTextField();
         passwordText = new javax.swing.JPasswordField();
@@ -70,16 +75,16 @@ public class LoginJFrame extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(48, 48, 48)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(loginPasswText, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jPasswordField1))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(loginUserText, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(95, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel1Layout.createSequentialGroup()
                     .addGap(116, 116, 116)
@@ -96,7 +101,7 @@ public class LoginJFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(loginPasswText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(151, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel1Layout.createSequentialGroup()
@@ -176,7 +181,7 @@ public class LoginJFrame extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
         );
 
         pack();
@@ -209,14 +214,14 @@ public class LoginJFrame extends javax.swing.JFrame {
             }
         }else{
             JOptionPane.showConfirmDialog(this, "Debe cubrir todos los campos","Error", JOptionPane.DEFAULT_OPTION);
-
         }
     }//GEN-LAST:event_botonRegistrarActionPerformed
 
     private void ButtonLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonLoginActionPerformed
         // TODO add your handling code here:
         String usuario=this.loginUserText.getText();
-        String pass=this.loginPasswText.getText();
+        String pass=new String(jPasswordField1.getPassword());
+        System.out.println(pass);
         Usuario u=rep.getUsuarioLogin(usuario, pass);
         if(u==null){
             JOptionPane.showConfirmDialog(this, "Error de login","Error",JOptionPane.DEFAULT_OPTION);
@@ -273,8 +278,8 @@ public class LoginJFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextField loginPasswText;
     private javax.swing.JTextField loginUserText;
     private javax.swing.JTextField nombreCompletoText;
     private javax.swing.JPasswordField passwordText;

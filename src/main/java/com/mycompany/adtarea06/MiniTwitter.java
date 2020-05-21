@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
@@ -42,6 +43,8 @@ public class MiniTwitter extends javax.swing.JFrame {
 
     public MiniTwitter() {
         initComponents();
+        setLocation((int) (ADTarea06.COORD_X - this.getSize().getWidth() / 2), (int) (ADTarea06.COORD_Y - this.getSize().getHeight() / 2));
+
     }
 
     public MiniTwitter(Usuario user, Repositorio rep) {
@@ -53,11 +56,6 @@ public class MiniTwitter extends javax.swing.JFrame {
         seguidos = rep.getSeguidos(user);
         buscados = new ArrayList();
         mensajes = rep.getMensajes(this);
-        System.out.println("size " + mensajes.size());
-        for (Mensaje m : mensajes) {
-
-            System.out.println(m.toString());
-        }
         modeloTablaMensajes = new ModeloTablaMensajes(mensajes);
         modeloTablaSeguidos = new ModeloTablaSeguidos(seguidos);
         modeloTablaBuscados = new ModeloTablaBuscados(buscados);
@@ -66,7 +64,7 @@ public class MiniTwitter extends javax.swing.JFrame {
         this.tablaMensajes.setModel(modeloTablaMensajes);
         this.setWithColumns(tablaMensajes, new int[]{10, 20, 10, 60});
         tablaMensajes.setRowHeight(25);
-
+        this.flushTablaSeguidos();
     }
 
     /**
@@ -568,16 +566,12 @@ public class MiniTwitter extends javax.swing.JFrame {
         msg.setText(this.textoMensajeAEnviar.getText());//Añadimos texto
         User msgUser = new User(this.user.getNome(), this.user.getUsername());//Añadimos el User
         msg.setUser(msgUser);
-        //Obtener los Hashtags:
-
-        //Pattern patron = Pattern.compile("#\\S+\\s");
         Pattern patron = Pattern.compile("#[a-zA-Z0-9_-]+");
         Matcher matcher = patron.matcher(this.textoMensajeAEnviar.getText());
         //Añadir los hashtags al mensaje
         while (matcher.find()) {
             String texto = matcher.group();
             texto = texto.replaceFirst("#", "").trim();//Quitar el # y el espacio en blanco final
-            System.out.println(texto);
             msg.getHashtags().add(texto);//Añadimos el hashtag, quitando el #
         }
         //Añadir fecha;
@@ -642,8 +636,6 @@ public class MiniTwitter extends javax.swing.JFrame {
         // Añadir al usuario activo el nuevo usuario seguido
         //En ejecucion
         uAux = this.modeloTablaBuscados.buscados.get(this.tablaUsuariosBuscados.getSelectedRow());
-        System.out.print("aux----->>>>>");
-        System.out.println(modeloTablaBuscados.buscados.get(this.tablaUsuariosBuscados.getSelectedRow()));
         user.getFollows().add(uAux.getUsername());
         this.seguidos.add(uAux);
         this.buscados.remove(uAux);
@@ -765,14 +757,12 @@ public class MiniTwitter extends javax.swing.JFrame {
         int puntoInicial = MiniTwitter.tamanoPagina * this.numeroPaginaSeguidos;
         int numSeguidos = user.follows.size();
         int hasta = Math.min(numSeguidos - puntoInicial, 5); // El menor de los dos valores. del punto de inicio al final el arraylist, o 5 (maximo visible en tabla).
-        System.out.println("Punto inicial: " + puntoInicial + "   Seguidos: " + numSeguidos + "    hasta: " + hasta);
         this.modeloTablaSeguidos.seguidos.clear();//vaciamos el arraylist
         for (int i = puntoInicial; i < puntoInicial + hasta; i++) {
             Usuario u = rep.getUsuarioByUserName(user.getFollows().get(i));
             if (u != null) {
                 modeloTablaSeguidos.seguidos.add(u);
             }
-            System.out.println("Siguiendo a " + u);
         }
         this.paginaSeguidosLabel.setText("" + numeroPaginaSeguidos);
         this.tablaUsuariosSeguidos.repaint();

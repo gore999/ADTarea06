@@ -6,6 +6,7 @@
 package com.mycompany.adtarea06;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
@@ -14,7 +15,7 @@ import javax.swing.table.TableModel;
  * @author Carlos
  */
 public class ModeloTablaSeguidos implements TableModel {
-    ArrayList<Usuario> seguidos;
+    List<Usuario> seguidos;
 
     public ModeloTablaSeguidos(ArrayList<Usuario> seguidos) {
         this.seguidos = seguidos;

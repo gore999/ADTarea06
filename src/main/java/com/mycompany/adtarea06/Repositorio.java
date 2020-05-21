@@ -25,10 +25,14 @@ import com.mongodb.util.JSON;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.BsonDocument;
@@ -57,19 +61,16 @@ public class Repositorio {
         } catch (FileNotFoundException ex) {
         }
         con = g.fromJson(json, Conexion.class);//Crear el objeto a partir de datos json.
-        System.out.println(con);
         String conJson = g.toJson(con);
 
-        MongoClientURI uri = new MongoClientURI("mongodb://"+con.getUsername()+":"+con.getPassword()+"@"+con.getAddress()+":"+con.getPort()+"/"+con.getDbname()+"?retryWrites=false");
+        MongoClientURI uri = new MongoClientURI("mongodb://" + con.getUsername() + ":" + con.getPassword() + "@" + con.getAddress() + ":" + con.getPort() + "/" + con.getDbname() + "?retryWrites=false");
         MongoClient mgClient = new MongoClient(uri);
- 
+
         //mgClient = new MongoClient(new MongoClientURI("mongodb://" + con.getAddress() + ":" + con.getPort()));//Establecer la conexion.
         DB db = mgClient.getDB(con.getDbname());// Obtener database
-        
-        System.out.println(mgClient);
         usuarioColeccion = db.getCollection("usuario");
         mensajeColeccion = db.getCollection("mensaxe");
-        
+
     }
 
     public static Repositorio getInstance() {
@@ -86,25 +87,16 @@ public class Repositorio {
                 .append("username", user.getUsername())
                 .append("password", user.getPassword())
                 .append("follows", user.getFollows());
-        System.out.println(usuarioInsert);
-        // DBBasicObjec
-        //DBObject mensajeMongo = (DBObject) JSON.parse(mensajeJSON);
         usuarioColeccion.insert(usuarioInsert);
-//        String usuarioJSON = g.toJson(user);
-//        // DBBasicObjec
-//        DBObject usuarioMongo = (DBObject) JSON.parse(usuarioJSON);
-//        usuarioColeccion.insert(usuarioMongo);
+
     }
 
     public boolean existeUsuario(String username) {
         boolean salida = false;
-        System.out.println("Nombre de user a comprobar: " + username);
-        System.out.println("Buscando");
         DBObject query = new BasicDBObject("username", username);
         DBCursor cursor = usuarioColeccion.find(query);
         while (cursor.hasNext()) {
             DBObject documento = cursor.next();
-            System.out.println(documento.toString());
             salida = true;
         }
         return salida;
@@ -120,21 +112,15 @@ public class Repositorio {
             us.setUsername((String) documento.get("username"));
             us.setPassword((String) documento.get("password"));
             us.setFollows((ArrayList<String>) documento.get("follows"));
-//          us = g.fromJson(documento.toString(), Usuario.class);
             if (us.getFollows() == null) {
                 us.setFollows(new ArrayList());
             }
-            System.out.println(us.toString());
-
         }
-
         return us;
     }
 
     //MENSAJES
     public void insertarMensaje(Mensaje msg) {
-
-        //String mensajeJSON = g.toJson(msg);
         DBObject msgInsert = new BasicDBObject()
                 .append("text", msg.getText())
                 .append("user", new BasicDBObject()
@@ -142,15 +128,11 @@ public class Repositorio {
                         .append("username", msg.getUser().getUsername()))
                 .append("date", new Date())
                 .append("hashtags", msg.getHashtags());
-        System.out.println(msgInsert);
-        // DBBasicObjec
-        //DBObject mensajeMongo = (DBObject) JSON.parse(mensajeJSON);
         mensajeColeccion.insert(msgInsert);
     }
 
     ArrayList<Usuario> getSeguidos(Usuario user) {
         ArrayList<Usuario> seguidos = new ArrayList();
-        System.out.println("Follows es: " + user.getFollows());
         for (String usuarioSeguido : user.getFollows()) {
             seguidos.add(getUsuarioByUserName(usuarioSeguido));
         }
@@ -168,7 +150,6 @@ public class Repositorio {
             us.setPassword((String) documento.get("password"));
             us.setFollows((ArrayList<String>) documento.get("follows"));
         }
-        System.out.println(us.toString());
         if (us.getFollows() == null) {
             us.setFollows(new ArrayList());
         }
@@ -177,9 +158,6 @@ public class Repositorio {
 
     ArrayList<Usuario> getUsuariosBuscadosPorUsername(String criterio, MiniTwitter mt) {
         ArrayList<Usuario> encontrados = new ArrayList();
-        //Filtro con expresion regular para encontrar usuarios cuyo nombre contenga el criterio de busqueda.
-        //Bson filter = Filters.or(Filters.regex("username", criterio) );
-        //Nuevo Filtro---> solo los que no seguimos. 
         Bson filter = Filters.and(Filters.regex("username", criterio), Filters.nin("username", mt.user.getFollows()), Filters.not(Filters.eq("username", mt.user.getUsername())));//Solo muestra los que no sigue.
         DBObject query = new BasicDBObject(filter.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
         //Opciones de busqueda para paginar.
@@ -187,12 +165,10 @@ public class Repositorio {
         //Crear sort para ordenado.
         Bson ordenar = Sorts.ascending("username");
         DBObject sort = new BasicDBObject(ordenar.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
-
         //Añadir restricciones
         options.sort(sort);
         options.limit(MiniTwitter.tamanoPagina);//Como maximo, el numero de resultados que marca la pagina.
         options.skip(mt.numeroPaginaBuscados * MiniTwitter.tamanoPagina); //Se salta los resultados de las paginas anteriores.
-
         //Iterar resultados.
         DBCursor cursor = usuarioColeccion.find(query, options);
         while (cursor.hasNext()) {
@@ -202,8 +178,6 @@ public class Repositorio {
             us.setUsername((String) doc.get("username"));
             us.setPassword((String) doc.get("password"));
             us.setFollows((ArrayList<String>) doc.get("follows"));
-            System.out.println(us);
-            //if(!mt.user.getUsername().equals(us.getUsername()))encontrados.add(us);//Solo se añade si no es el mismo usuario al logueado.
             encontrados.add(us);
         }
         cursor.close();
@@ -226,46 +200,56 @@ public class Repositorio {
             case 1:// Mensajes por usuario
                 filter = Filters.in("user.username", mt.user.follows);
                 query = new BasicDBObject(filter.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
-                System.out.println(query.toString());
-                System.out.println(mt.user.toString());
                 break;
             case 2:// Mensajes por hashtag.
                 filter = Filters.in("hashtags", mt.cadenaAux);//Usamos la cadena auxiliar
                 query = new BasicDBObject(filter.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
-                System.out.println(query);
                 break;
         }
-        System.out.println("buscando mensajes");
         //Paginado, comun para todos los casos;
         DBCollectionFindOptions options = new DBCollectionFindOptions();
         //Crear sort para ordenado.
         Bson ordenar = Sorts.descending("date");
         DBObject sort = new BasicDBObject(ordenar.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
-
         //Añadir restricciones
         options.sort(sort);
         options.limit(MiniTwitter.tamanoPagina);//Como maximo, el numero de resultados que marca la pagina.
         options.skip(mt.numeroPagina * MiniTwitter.tamanoPagina); //Se salta los resultados de las paginas anteriores.
         // Iterar
-        System.out.println("Options" + options.toString());
         DBCursor cursor = this.mensajeColeccion.find(query, options);
         while (cursor.hasNext()) {
             DBObject documento = cursor.next();
             Mensaje m = new Mensaje();
             m.setText((String) documento.get("text"));
-            try{
+            try {
                 m.setDate((Date) documento.get("date"));
-            }catch(Exception ex){
-                 m.setDate(new Date());
+            } catch (Exception ex) {
+                try {
+                    String string = (String) documento.get("date");
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                    Date date = dateFormat.parse(string);
+                    m.setDate(date);
+
+                } catch (ParseException ex1) {
+                    try {
+                        String string = (String) documento.get("date");
+                        DateFormat dateFormat = new SimpleDateFormat("ddd,-MM-dd'T'HH:mm:ss", Locale.US);
+                        Date date = dateFormat.parse(string);
+                        m.setDate(date);
+                    } catch (ParseException ex2) {
+                        m.setDate(null);
+                    }
+                } catch (Exception e) {
+                    
+                }
             }
-            
+
             m.setHashtags((ArrayList<String>) documento.get("hashtags"));
             DBObject d2 = (DBObject) documento.get("user");
             User u = new User();
             u.setNombre((String) d2.get("nome"));
             u.setUsername((String) d2.get("username"));
             m.setUser(u);
-            //msgAux = g.fromJson(documento.toString(), Mensaje.class);
             salida.add(m);
         }
         return salida;
