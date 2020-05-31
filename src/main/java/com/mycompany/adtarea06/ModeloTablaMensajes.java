@@ -18,6 +18,10 @@ public class ModeloTablaMensajes implements TableModel {
 
     ArrayList<Mensaje> mensajes;
 
+    public ArrayList<Mensaje> getMensajes() {
+        return mensajes;
+    }
+
     public ModeloTablaMensajes(ArrayList<Mensaje> mensajes) {
         this.mensajes = mensajes;
         if (mensajes == null) {

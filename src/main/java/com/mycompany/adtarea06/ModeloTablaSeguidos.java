@@ -16,6 +16,7 @@ import javax.swing.table.TableModel;
  */
 public class ModeloTablaSeguidos implements TableModel {
     List<Usuario> seguidos;
+        
 
     public ModeloTablaSeguidos(ArrayList<Usuario> seguidos) {
         this.seguidos = seguidos;

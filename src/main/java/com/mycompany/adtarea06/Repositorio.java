@@ -262,4 +262,19 @@ public class Repositorio {
         DBObject update = new BasicDBObject(updateAux.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
         usuarioColeccion.update(queryUpdate, update);
     }
+    void updateUserEliminar(Usuario user,String userAQuitar) {
+            Bson filterUpdate = Filters.eq("username", user.getUsername()); //El Bson del filtro selecciona los datos del propio usuario.
+            DBObject queryUpdate = new BasicDBObject(filterUpdate.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry())); //Convertir Bson filtro a objeto BD
+            Bson updateAux = Updates.pull("follows", userAQuitar); //crear Bson actualizacion
+            DBObject update = new BasicDBObject(updateAux.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
+            usuarioColeccion.update(queryUpdate, update);
+        }
+    void deleteMensaje(Mensaje m) {
+        System.out.println("A borrar!");
+        Bson filter = Filters.and(Filters.eq("user.username",m.user.getUsername()),Filters.eq("text", m.getText()), Filters.eq("date",m.getDate()));//Solo muestra los que no sigue.
+        DBObject query = new BasicDBObject(filter.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry()));
+        DBObject documento = mensajeColeccion.findOne(query);
+        
+        mensajeColeccion.remove(documento);
+    }
 }
